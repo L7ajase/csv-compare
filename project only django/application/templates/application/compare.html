@@ -1,0 +1,39 @@
+{% extends "layout.html" %} 
+
+{% block title %}
+    CSV File Comparison
+{% endblock %}
+
+
+{% block content %}
+    <h1>Compare Two CSV Files</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Compare</button>
+    </form>
+    <div class="tables-container">
+        {% if table1 %}
+            <div class="table-box left">
+                <h4>{{ file1_name }}</h4>
+                {{ table1|safe }}
+            </div>
+        {% endif %}
+
+        {% if table2 %}  
+            <div class="table-box left">  
+                <h4>{{ file2_name }}</h4>
+                {{ table2|safe }}
+            </div>    
+        {% endif %}
+
+        {% if result %}
+            <h4>Comparison Result:</h4>
+            <ul>
+                {% for line in result %}
+                    <li>{{ line }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>    
+{% endblock %}
