@@ -27,13 +27,11 @@
             </div>    
         {% endif %}
 
-        {% if result %}
-            <h4>Comparison Result:</h4>
-            <ul>
-                {% for line in result %}
-                    <li>{{ line }}</li>
-                {% endfor %}
-            </ul>
+        {% if table3 %}  
+            <div class="table-box left">  
+                <h4>Comparison Result:</h4>
+                {{ table3|safe }}
+            </div>    
         {% endif %}
     </div>    
 {% endblock %}
