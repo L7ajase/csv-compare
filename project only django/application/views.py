@@ -10,6 +10,7 @@ def compare_files_view(request):
     result = None
     table1 = None 
     table2 = None
+    table3 = None
     file1_name = None
     file2_name = None
 
@@ -25,42 +26,47 @@ def compare_files_view(request):
             tmp1_path = None
             tmp2_path = None
 
-        try:
-            # create temporary files and write content
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp1:
-                for chunk in file1.chunks():
-                    tmp1.write(chunk)
-                tmp1_path = tmp1.name
+            try:
+                # create temporary files and write content
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp1:
+                    for chunk in file1.chunks():
+                        tmp1.write(chunk)
+                    tmp1_path = tmp1.name
 
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp2:
-                for chunk in file2.chunks():
-                    tmp2.write(chunk)
-                tmp2_path = tmp2.name
-                
-                
-            #read the files with pandas
-            df1 = pd.read_csv(tmp1_path)
-            df2 = pd.read_csv(tmp2_path)
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp2:
+                    for chunk in file2.chunks():
+                        tmp2.write(chunk)
+                    tmp2_path = tmp2.name
 
-            # Convertir en HTML ou liste pour affichage
-            table1 = df1.to_html(classes='table table-striped', index=False, escape=False)
-            table2 = df2.to_html(classes='table table-striped', index=False, escape=False)
-                 
-            #compare the files
-            result = comparaison_processe(tmp1_path, tmp2_path)
+                #read the files with pandas
+                df1 = pd.read_csv(tmp1_path)
+                df2 = pd.read_csv(tmp2_path)
+                df3 = pd.DataFrame(result)
 
-        except pd.errors.EmptyDataError:
-            result = ["Erreur: Un des fichiers CSV est vide"]
-        except pd.errors.ParserError as e:
-            result = [f"Erreur lors de l'analyse du CSV: {str(e)}"]
-        except Exception as e:
-            result = [f"Erreur lors de la lecture des fichiers CSV: {str(e)}"]         
+                # Convertir en HTML ou liste pour affichage
+                table1 = df1.to_html(classes='table table-striped', index=False, escape=False)
+                table2 = df2.to_html(classes='table table-striped', index=False, escape=False)
+                table3 = df3.to_html(classes='table table-striped', index=False, escape=False)
 
-        finally:
-            #clean up the temporary files
-            for temp_path in [tmp1_path, tmp2_path]:
-                if temp_path and os.path.exists(temp_path):
-                    os.unlink(temp_path)       
+                #compare the files
+                result = comparaison_processe(tmp1_path, tmp2_path)
+
+            except pd.errors.EmptyDataError:
+                result = ["Erreur: Un des fichiers CSV est vide"]
+            except pd.errors.ParserError as e:
+                result = [f"Erreur lors de l'analyse du CSV: {str(e)}"]
+            except Exception as e:
+                result = [f"Erreur lors de la lecture des fichiers CSV: {str(e)}"]         
+
+            finally:
+                #clean up the temporary files
+                for temp_path in [tmp1_path, tmp2_path]:
+                    if temp_path and os.path.exists(temp_path):
+                        try:
+                            os.unlink(temp_path)  
+                        except OSError :
+                            pass #ignorer les erreures lors de la supresion de temp files
+
 
     else:
         form = FileUploadForm()
@@ -70,6 +76,7 @@ def compare_files_view(request):
         'result': result,
         'table1': table1,
         'table2': table2,
+        'table3': table3,
         'file1_name': file1_name,
         'file2_name': file2_name
         })
