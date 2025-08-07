@@ -42,6 +42,9 @@ def compare_files_view(request):
                 df1 = pd.read_csv(tmp1_path)
                 df2 = pd.read_csv(tmp2_path)
                 df3 = pd.DataFrame(result)
+                #remove the unnamed columns
+                df1 = df1.loc[:, ~df1.columns.str.contains('^Unnamed')]
+                df2 = df2.loc[:, ~df2.columns.str.contains('^Unnamed')]
 
                 # Convertir en HTML ou liste pour affichage
                 table1 = df1.to_html(classes='table table-striped', index=False, escape=False)
